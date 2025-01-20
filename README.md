@@ -1,5 +1,4 @@
 
-
 # YouTube Video Downloader
 
 A Python-based tool to download YouTube videos using `yt-dlp` with support for multiprocessing, custom quality settings, and output directories. The tool is containerized using Docker for easy deployment.
@@ -13,6 +12,7 @@ A Python-based tool to download YouTube videos using `yt-dlp` with support for m
 - **Custom Output Directory**: Save downloaded videos to a specified directory.
 - **Random User-Agent**: Uses `fake-useragent` to bypass restrictions.
 - **Docker Support**: Run the tool in a Docker container for portability.
+- **Cookies Support**: Use a `cookies.txt` file to download age-restricted or private videos.
 
 ---
 
@@ -20,6 +20,7 @@ A Python-based tool to download YouTube videos using `yt-dlp` with support for m
 
 - **Python 3.9+**: Required to run the script.
 - **Docker**: Optional, for running the tool in a containerized environment.
+- **ffmpeg**: Required for merging video and audio streams (included in the Docker image).
 
 ---
 
@@ -113,6 +114,7 @@ yt-dlp-downloader/
 ├── requirements.txt      # Python dependencies
 ├── Dockerfile            # Docker configuration
 ├── README.md             # Project documentation
+├── cookies.txt           # Optional cookies file for authentication
 └── downloads/            # Default output directory (created automatically)
 ```
 
@@ -142,6 +144,26 @@ If you encounter a `403 Forbidden` error:
 
 ---
 
+### `ffmpeg` Not Installed Error
+
+If you encounter the error `ERROR: You have requested merging of multiple formats but ffmpeg is not installed`:
+
+1. **Install `ffmpeg`**:
+   - If running locally, install `ffmpeg` using your package manager:
+     ```bash
+     sudo apt-get install ffmpeg  # For Debian/Ubuntu
+     brew install ffmpeg          # For macOS
+     ```
+   - If using Docker, ensure the `Dockerfile` includes the installation of `ffmpeg` (already included in the provided `Dockerfile`).
+
+2. **Rebuild the Docker Image**:
+   If using Docker, rebuild the image after updating the `Dockerfile`:
+   ```bash
+   docker build -t yt-dlp-downloader .
+   ```
+
+---
+
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
@@ -161,22 +183,18 @@ Contributions are welcome! Please open an issue or submit a pull request for any
 
 ---
 
-### Creating a `cookies.txt` file involves exporting your browser's cookies, typically for YouTube, and saving them in a format that `yt-dlp` can use. This is particularly useful for downloading age-restricted or private videos.
+## Creating a `cookies.txt` File
 
-Here’s how you can create a `cookies.txt` file:
+To download age-restricted or private videos, you need to create a `cookies.txt` file:
 
----
-
-### Steps to Create `cookies.txt`
-
-#### 1. **Install a Browser Extension**
+1. **Install a Browser Extension**:
    - For **Google Chrome** or **Microsoft Edge**, use the [Get cookies.txt](https://chrome.google.com/webstore/detail/get-cookiestxt/bgaddhkoddajcdgocldbbfleckgcbcid) extension.
    - For **Firefox**, use the [cookies.txt](https://addons.mozilla.org/en-US/firefox/addon/cookies-txt/) extension.
 
-#### 2. **Log in to YouTube**
-   - Open your browser and log in to your YouTube account. This ensures that the cookies include your session information.
+2. **Log in to YouTube**:
+   - Open your browser and log in to your YouTube account.
 
-#### 3. **Export Cookies**
+3. **Export Cookies**:
    - Navigate to YouTube (`https://www.youtube.com`).
    - Click on the extension icon in your browser toolbar.
    - Select the option to export cookies.
@@ -226,16 +244,3 @@ ydl_opts = {
 
 ---
 
-### Example Workflow
-
-1. Log in to YouTube in your browser.
-2. Export cookies using the browser extension.
-3. Save the file as `cookies.txt` in your project directory.
-4. Run the script:
-   ```bash
-   python app.py -u "https://youtu.be/5uQjEdfHog4" -q 1080
-   ```
-
-The script will use the cookies to authenticate your requests.
-
-# ytdownloader
