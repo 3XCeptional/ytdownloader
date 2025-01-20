@@ -30,7 +30,7 @@ A Python-based tool to download YouTube videos using `yt-dlp` with support for m
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/3XCeptional/yt-dlp-downloader.git
+   git clone https://github.com/3XCeptional/yt_downloader.git
    cd yt-dlp-downloader
    ```
 
@@ -48,18 +48,18 @@ A Python-based tool to download YouTube videos using `yt-dlp` with support for m
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/3XCeptional/yt-dlp-downloader.git
+   git clone https://github.com/3XCeptional/yt_downloader.git
    cd yt-dlp-downloader
    ```
 
 2. Build the Docker image:
    ```bash
-   docker build -t yt-dlp-downloader .
+   docker build -t yt_downloader .
    ```
 
 3. Run the Docker container:
    ```bash
-   docker run --rm -v $(pwd)/downloads:/app/YTdownloads yt-dlp-downloader -u "https://youtu.be/5uQjEdfHog4" -q 1080
+   docker run --rm -v $(pwd)/downloads:/app/YTdownloads yt_downloader -u "https://youtu.be/5uQjEdfHog4" -q 1080
    ```
 
 ---
@@ -88,7 +88,7 @@ A Python-based tool to download YouTube videos using `yt-dlp` with support for m
 
 3. Run using Docker:
    ```bash
-   docker run --rm -v $(pwd)/downloads:/app/YTdownloads yt-dlp-downloader -u "https://youtu.be/5uQjEdfHog4" -q 1080
+   docker run --rm -v $(pwd)/downloads:/app/YTdownloads yt_downloader -u "https://youtu.be/5uQjEdfHog4" -q 1080
    ```
 
 ---
@@ -159,7 +159,7 @@ If you encounter the error `ERROR: You have requested merging of multiple format
 2. **Rebuild the Docker Image**:
    If using Docker, rebuild the image after updating the `Dockerfile`:
    ```bash
-   docker build -t yt-dlp-downloader .
+   docker build -t yt_downloader .
    ```
 
 ---
