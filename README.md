@@ -1,246 +1,159 @@
+# Concurrent YouTube Downloader (using yt-dlp)
 
-# YouTube Video Downloader
-
-A Python-based tool to download YouTube videos using `yt-dlp` with support for multiprocessing, custom quality settings, and output directories. The tool is containerized using Docker for easy deployment.
-
----
+A Python script and Docker setup to download YouTube videos concurrently using the powerful `yt-dlp` library. It supports quality selection, reading URLs from files, using cookies for restricted content, and flexible output locations, defaulting to the current directory for simplicity.
 
 ## Features
 
-- **Multiprocessing Support**: Download multiple videos in parallel.
-- **Custom Quality**: Specify the video quality (e.g., 1080p, 720p).
-- **Custom Output Directory**: Save downloaded videos to a specified directory.
-- **Random User-Agent**: Uses `fake-useragent` to bypass restrictions.
-- **Docker Support**: Run the tool in a Docker container for portability.
-- **Cookies Support**: Use a `cookies.txt` file to download age-restricted or private videos.
-
----
+*   **Concurrent Downloads:** Uses Python's `multiprocessing` to download multiple videos in parallel, significantly speeding up batch downloads.
+*   **Quality Selection:** Specify the maximum desired video quality (e.g., 1080p, 720p).
+*   **Flexible Input:** Provide video URLs directly via command line or list them in a text file.
+*   **Cookie Support:** Use browser cookies (e.g., `cookies.txt` format) to download age-restricted or members-only content (requires exporting cookies from your browser).
+*   **Configurable Output:** Download videos to the current directory (default) or specify a custom output path.
+*   **Progress Tracking:** Uses `tqdm` for a clean overall progress bar.
+*   **Metadata & Thumbnails:** Embeds video metadata (title, uploader) and thumbnail into the output MP4 file (requires `ffmpeg`).
+*   **Random User-Agents:** Uses `fake-useragent` to vary the User-Agent header for downloads.
+*   **Dockerized:** Includes a `Dockerfile` for easy setup and dependency management, running as a non-root user for better security.
 
 ## Prerequisites
 
-- **Python 3.9+**: Required to run the script.
-- **Docker**: Optional, for running the tool in a containerized environment.
-- **ffmpeg**: Required for merging video and audio streams (included in the Docker image).
+### For Running the Script Directly:
 
----
+1.  **Python:** Version 3.8 or higher recommended.
+2.  **pip:** Python package installer (usually comes with Python).
+3.  **ffmpeg:** Essential for merging video/audio streams and embedding metadata/thumbnails. `yt-dlp` relies heavily on it. Ensure `ffmpeg` is installed and accessible in your system's PATH. ([Download ffmpeg](https://ffmpeg.org/download.html))
+4.  **Git (Optional):** To clone the repository.
 
-## Installation
+### For Using Docker:
 
-### Without Docker
+1.  **Docker Engine:** Install Docker for your operating system. ([Install Docker](https://docs.docker.com/engine/install/))
+    *   _(ffmpeg and Python dependencies are handled *inside* the container)_
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/3XCeptional/yt_downloader.git
-   cd yt-dlp-downloader
-   ```
+## Installation / Setup
 
-2. Install the required Python packages:
-   ```bash
-   pip install -r requirements.txt
-   ```
+### Option 1: Run the Script Directly
 
-3. Run the script:
-   ```bash
-   python app.py -u "https://youtu.be/5uQjEdfHog4" -q 1080 -o "downloads"
-   ```
+1.  **Clone or Download:**
+    ```bash
+    git clone <repository_url> # Or download the ZIP and extract
+    cd <repository_directory>
+    ```
+2.  **(Optional but Recommended) Create a Virtual Environment:**
+    ```bash
+    # Linux/macOS
+    python3 -m venv venv
+    source venv/bin/activate
 
-### With Docker
+    # Windows
+    python -m venv venv
+    .\venv\Scripts\activate
+    ```
+3.  **Install Dependencies:**
+    ```bash
+    pip install -r requirements.txt
+    ```
+4.  **Verify `ffmpeg`:** Make sure the `ffmpeg` command works in your terminal.
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/3XCeptional/yt_downloader.git
-   cd yt-dlp-downloader
-   ```
+### Option 2: Use Docker (Recommended for Isolation & Simplicity)
 
-2. Build the Docker image:
-   ```bash
-   docker build -t yt_downloader .
-   ```
-
-3. Run the Docker container:
-   ```bash
-   docker run --rm -v $(pwd)/downloads:/app/YTdownloads yt_downloader -u "https://youtu.be/5uQjEdfHog4" -q 1080
-   ```
-
----
+1.  **Clone or Download:**
+    ```bash
+    git clone <repository_url> # Or download the ZIP and extract
+    cd <repository_directory>
+    ```
+2.  **Build the Docker Image:**
+    ```bash
+    docker build -t yt-downloader .
+    ```
+    *(This command builds an image named `yt-downloader` based on the `Dockerfile` in the current directory.)*
 
 ## Usage
 
-### Command-Line Arguments
+The script (`ytdl_pro.py`) downloads files to the current working directory by default.
 
-| Argument       | Description                                                                 | Example                          |
-|----------------|-----------------------------------------------------------------------------|----------------------------------|
-| `-u`, `--urls` | List of YouTube video URLs to download.                                     | `-u "https://youtu.be/example1"` |
-| `-q`, `--quality` | Desired video quality (e.g., 1080, 720).                                | `-q 1080`                        |
-| `-o`, `--output` | Output directory for downloaded videos (default: `YTdownloads`).         | `-o "MyDownloads"`               |
+### Running the Script Directly
 
-### Examples
+*(Make sure you are in the repository directory and have activated the virtual environment if you created one)*
 
-1. Download a single video at 1080p quality:
-   ```bash
-   python app.py -u "https://youtu.be/5uQjEdfHog4" -q 1080
-   ```
+*   **Download specific URLs (max 1080p) to current directory:**
+    ```bash
+    python ytdl_pro.py -q 1080 -u https://www.youtube.com/watch?v=VIDEO_ID_1 https://www.youtube.com/watch?v=VIDEO_ID_2
+    ```
+*   **Download from a file (max 720p) to a specific directory:**
+    *(Create `urls.txt` with one URL per line)*
+    ```bash
+    python ytdl_pro.py -q 720 -f urls.txt -o ./my_video_downloads
+    ```
+*   **Use cookies (for restricted content):**
+    *(Requires a `cookies.txt` file exported from your browser)*
+    ```bash
+    python ytdl_pro.py -q 1080 -c cookies.txt -u https://www.youtube.com/watch?v=RESTRICTED_VIDEO_ID
+    ```
+*   **Increase parallel downloads (e.g., 8 processes):**
+    ```bash
+    python ytdl_pro.py -q 720 -p 8 -f urls.txt
+    ```
+*   **Get help:**
+    ```bash
+    python ytdl_pro.py --help
+    ```
 
-2. Download multiple videos at 720p quality to a custom directory:
-   ```bash
-   python app.py -u "https://youtu.be/example1" "https://youtu.be/example2" -q 720 -o "MyDownloads"
-   ```
+### Running with Docker
 
-3. Run using Docker:
-   ```bash
-   docker run --rm -v $(pwd)/downloads:/app/YTdownloads yt_downloader -u "https://youtu.be/5uQjEdfHog4" -q 1080
-   ```
+The key advantage here is easy dependency management and the ability to map your host directory directly into the container's working directory (`/app`).
 
----
+*   **Download URLs (max 1080p), saving to your current host directory:**
+    ```bash
+    # Linux/macOS
+    docker run --rm -v "$(pwd):/app" yt-downloader -q 1080 -u https://www.youtube.com/watch?v=VIDEO_ID
 
-## Configuration
+    # Windows (PowerShell)
+    docker run --rm -v "${PWD}:/app" yt-downloader -q 1080 -u https://www.youtube.com/watch?v=VIDEO_ID
 
-### Cookies File (Optional)
+    # Windows (CMD)
+    docker run --rm -v "%CD%:/app" yt-downloader -q 1080 -u https://www.youtube.com/watch?v=VIDEO_ID
+    ```
+    *   `-v "$(pwd):/app"` (or `${PWD}`, `%CD%`) mounts your current directory on the host to `/app` inside the container.
+    *   Since the script saves to its current directory (`/app` inside the container), the files appear directly on your host.
+    *   `--rm` automatically removes the container when it exits.
 
-To download age-restricted or private videos, you can use a `cookies.txt` file:
+*   **Download from file / use cookies (files must be in your current host directory):**
+    *(Assuming `urls.txt` and/or `cookies.txt` are in the directory where you run `docker run`)*
+    ```bash
+    # Linux/macOS
+    docker run --rm -v "$(pwd):/app" yt-downloader -q 720 -f urls.txt -c cookies.txt
 
-1. Export cookies from your browser using an extension like [Get cookies.txt](https://chrome.google.com/webstore/detail/get-cookiestxt/bgaddhkoddajcdgocldbbfleckgcbcid).
-2. Save the file as `cookies.txt` in the project root.
-3. The script will automatically use the cookies if the file exists.
+    # Windows (PowerShell)
+    docker run --rm -v "${PWD}:/app" yt-downloader -q 720 -f urls.txt -c cookies.txt
+    ```
 
----
+*   **Save to a specific *sub-directory* within your current host directory:**
+    ```bash
+    # Linux/macOS (will create 'specific_output' on host if it doesn't exist)
+    docker run --rm -v "$(pwd):/app" yt-downloader -q 1080 -u <url> -o specific_output
+    ```
 
-## Directory Structure
+*   **Get help:**
+    ```bash
+    docker run --rm yt-downloader --help
+    ```
 
-```
-yt-dlp-downloader/
-│
-├── app.py                # Main Python script
-├── requirements.txt      # Python dependencies
-├── Dockerfile            # Docker configuration
-├── README.md             # Project documentation
-├── cookies.txt           # Optional cookies file for authentication
-└── downloads/            # Default output directory (created automatically)
-```
+## Command-Line Arguments
 
----
+Run `python ytdl_pro.py --help` or `docker run --rm yt-downloader --help` to see all available options:
 
-## Troubleshooting
-
-### HTTP 403 Forbidden Error
-
-If you encounter a `403 Forbidden` error:
-
-1. **Update `yt-dlp`**:
-   ```bash
-   pip install --upgrade yt-dlp
-   ```
-
-2. **Use Cookies**:
-   Export cookies from your browser and save them as `cookies.txt` in the project root.
-
-3. **Enable Verbose Logging**:
-   Modify the script to enable verbose logging for more details:
-   ```python
-   ydl_opts = {
-       'verbose': True,
-   }
-   ```
-
----
-
-### `ffmpeg` Not Installed Error
-
-If you encounter the error `ERROR: You have requested merging of multiple formats but ffmpeg is not installed`:
-
-1. **Install `ffmpeg`**:
-   - If running locally, install `ffmpeg` using your package manager:
-     ```bash
-     sudo apt-get install ffmpeg  # For Debian/Ubuntu
-     brew install ffmpeg          # For macOS
-     ```
-   - If using Docker, ensure the `Dockerfile` includes the installation of `ffmpeg` (already included in the provided `Dockerfile`).
-
-2. **Rebuild the Docker Image**:
-   If using Docker, rebuild the image after updating the `Dockerfile`:
-   ```bash
-   docker build -t yt_downloader .
-   ```
-
----
+*   `-u URLS [URLS ...]` / `--urls URLS [URLS ...]`: List of YouTube URLs.
+*   `-f FILE` / `--file FILE`: Path to a file containing URLs (one per line).
+*   `-q QUALITY` / `--quality QUALITY`: **(Required)** Max video quality/height (e.g., 1080, 720, 480).
+*   `-o OUTPUT` / `--output OUTPUT`: Output directory (default: "." - current directory).
+*   `-p PROCESSES` / `--processes PROCESSES`: Number of parallel downloads (default: system CPU count).
+*   `-c COOKIEFILE` / `--cookiefile COOKIEFILE`: Path to cookies file (optional).
+*   `--quiet-ydl`: Suppress yt-dlp's own console output.
+*   `--verbose`: Enable verbose logging for this script.
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
-
----
+This project is licensed under the MIT License - see the `LICENSE` file for details (You should create a `LICENSE` file, e.g., containing the MIT license text).
 
 ## Contributing
 
-Contributions are welcome! Please open an issue or submit a pull request for any improvements or bug fixes.
-
----
-
-## Acknowledgments
-
-- [yt-dlp](https://github.com/yt-dlp/yt-dlp): A feature-rich YouTube downloader.
-- [fake-useragent](https://github.com/hellysmile/fake-useragent): For generating random user-agent strings.
-
----
-
-## Creating a `cookies.txt` File
-
-To download age-restricted or private videos, you need to create a `cookies.txt` file:
-
-1. **Install a Browser Extension**:
-   - For **Google Chrome** or **Microsoft Edge**, use the [Get cookies.txt](https://chrome.google.com/webstore/detail/get-cookiestxt/bgaddhkoddajcdgocldbbfleckgcbcid) extension.
-   - For **Firefox**, use the [cookies.txt](https://addons.mozilla.org/en-US/firefox/addon/cookies-txt/) extension.
-
-2. **Log in to YouTube**:
-   - Open your browser and log in to your YouTube account.
-
-3. **Export Cookies**:
-   - Navigate to YouTube (`https://www.youtube.com`).
-   - Click on the extension icon in your browser toolbar.
-   - Select the option to export cookies.
-   - Save the file as `cookies.txt` in the root directory of your project.
-
----
-
-### Example `cookies.txt` Format
-
-The `cookies.txt` file should look something like this:
-
-```plaintext
-.youtube.com	TRUE	/	TRUE	1712345678	VISITOR_INFO1_LIVE	abc123xyz456
-.youtube.com	TRUE	/	TRUE	1712345678	PREF	f1=50000000
-.youtube.com	TRUE	/	TRUE	1712345678	YSC	ABCdefGHIjkLMNop
-```
-
-Each line represents a cookie with the following fields (tab-separated):
-1. **Domain**: The domain the cookie belongs to (e.g., `.youtube.com`).
-2. **Include Subdomains**: `TRUE` or `FALSE`.
-3. **Path**: The path the cookie is valid for (e.g., `/`).
-4. **Secure**: `TRUE` or `FALSE`.
-5. **Expiration**: The expiration date in Unix timestamp format.
-6. **Name**: The name of the cookie (e.g., `VISITOR_INFO1_LIVE`).
-7. **Value**: The value of the cookie.
-
----
-
-### Using `cookies.txt` in Your Script
-
-Once you have the `cookies.txt` file, place it in the root directory of your project. The script will automatically use it if the file exists.
-
-For example, in your `app.py` script, the `ydl_opts` dictionary includes the `cookiefile` option:
-
-```python
-ydl_opts = {
-    'cookiefile': 'cookies.txt',  # Use cookies.txt if it exists
-}
-```
-
----
-
-### Notes:
-- **Privacy Warning**: The `cookies.txt` file contains sensitive information (e.g., session cookies). Do not share this file publicly.
-- **Expiration**: Cookies expire after a certain period. If the `cookies.txt` file stops working, you may need to export a new one.
-- **Browser Compatibility**: Ensure you use a browser extension that supports the format required by `yt-dlp`.
-
----
-
+Contributions are welcome! Please feel free to open an issue or submit a pull request.
