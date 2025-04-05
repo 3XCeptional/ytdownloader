@@ -34,8 +34,8 @@ A Python script and Docker setup to download YouTube videos concurrently using t
 
 1.  **Clone or Download:**
     ```bash
-    git clone <repository_url> # Or download the ZIP and extract
-    cd <repository_directory>
+    git clone https://github.com/3XCeptional/ytdownloader.git # Or download the ZIP and extract
+    cd ytdownloader
     ```
 2.  **(Optional but Recommended) Create a Virtual Environment:**
     ```bash
